@@ -15,6 +15,7 @@ Q2.
 ```{r}
 demographic_data =
   read_csv("nhanes_covar.csv", na = c('NA', ' ', '.'), col_names = TRUE, skip = 4) |>
+  drop_na() |>
   janitor::clean_names() |>
   filter(age>=21) |>
   mutate(
@@ -35,8 +36,10 @@ demographic_data =
 
 accelerometer_data = 
   read_csv("nhanes_accel.csv", na=c('NA',' ','.')) |>
+  drop_na() |>
   janitor::clean_names()
-  
+```
+```{r}
 dd_table <- demographic_data |>
   group_by(education,sex) |>
   summarise(count=n(), .groups = 'drop')|>
@@ -48,5 +51,13 @@ dd_plot <- demographic_data |>
   geom_violin()+
   theme_minimal()
 dd_plot
-##
 ```
+Relatively, there are more men going to high school than women, for less than and more that high school, the number are pretty close. \
+For both man and women, the age lies averagely for high school equivalent. There are less young energy(<30) for less than high school, while for more than high school, the condition is exactly the opposite.
+```{r}
+total_activity_data <- 
+  accelerometer_data |>
+  mutate(total_activity= rowSums(select(.,2:1441)), na.rm=TRUE)
+
+```
+
