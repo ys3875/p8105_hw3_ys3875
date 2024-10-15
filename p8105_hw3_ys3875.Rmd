@@ -52,6 +52,7 @@ dd_plot <- demographic_data |>
   theme_minimal()
 dd_plot
 ```
+
 Relatively, there are more men going to high school than women, for less than and more that high school, the number are pretty close. \
 For both man and women, the age lies averagely for high school equivalent. There are less young energy(<30) for less than high school, while for more than high school, the condition is exactly the opposite.
 ```{r}
@@ -69,6 +70,7 @@ ggplot(total_activity_data, aes(x=age, y=total_activity, color=sex))+
   facet_wrap(.~education)+
   theme_minimal()
 ```
+
 We can see from the plots that no matter what education level for both man and woman, their total activital tend to get smaller as the age goes up.
 ```{r}
 acc_data <- accelerometer_data |>
@@ -83,5 +85,73 @@ ggplot(acc_data, aes(x=minutes,y=activity,color=sex))+
          facet_wrap(.~education)+
          theme_minimal()
 ```
+
 People are not willing to do activities during noon, and those who are more than high school tend to do more compared to the other two groups.
 
+Q3.
+```{r}
+Jan_2020_Citi <- read_csv("citibike/Jan 2020 Citi.csv", na = c('NA', ' ', '.')) |>
+  drop_na() |>
+  janitor::clean_names() |>
+  mutate(year=2020, month='January')
+
+July_2020_Citi <- read_csv("citibike/July 2020 Citi.csv",na = c('NA', ' ', '.')) |>
+  drop_na() |>
+  janitor::clean_names() |>
+  mutate(year=2020, month='July')
+
+Jan_2024_Citi <- read_csv("citibike/Jan 2024 Citi.csv",na = c('NA', ' ', '.')) |>
+  drop_na() |>
+  janitor::clean_names() |>
+  mutate(year=2024, month='January')
+
+July_2024_Citi <- read_csv("citibike/July 2024 Citi.csv",na = c('NA', ' ', '.')) |>
+  drop_na() |>
+  janitor::clean_names() |>
+  mutate(year=2024, month='July')
+
+Q3_data_all <- bind_rows(Jan_2020_Citi,July_2020_Citi,Jan_2024_Citi,July_2024_Citi) |>
+  janitor::clean_names()
+
+  
+```
+The datasets show the data of bike usage.
+```{r}
+total_rides_data <- Q3_data_all |>
+  group_by(year,month,member_casual) |>
+  summarise(total_rides=n(), .groups = 'drop')
+```
+People are more willing to ride during July.
+```{r}
+top_5_starting_station_July2024 <- July_2024_Citi |>
+  group_by(start_station_name) |>
+  summarise(total_rides=n(),.groups = 'drop') |>
+  arrange(desc(total_rides)) |>
+  slice(1:5)
+```
+
+```{r}
+Q3_data_all_median <- Q3_data_all |>
+  group_by(year, month, weekdays) |>
+  summarise(median_weekdays=median(duration),.groups = 'drop')
+
+ggplot(Q3_data_all_median, 
+       aes(x=weekdays, y=median_weekdays,
+           color=year)) +
+  geom_point()+
+  geom_line()+
+  theme_minimal()
+```
+
+The plot tells us that people are more willing to go riding during weekends.
+```{r}
+data_2024 <- Q3_data_all |>
+  filter(year==2024)
+
+ggplot(data_2024,aes(x=duration, y=rideable_type))+
+  geom_point()+
+  facet_grid(member_casual~month) +
+  theme_minimal()
+```
+
+For casual people, they use electric bike more often compared to the members.
